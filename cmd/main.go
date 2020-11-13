@@ -24,15 +24,15 @@ var reads int64
 var writes int64
 var errors int64
 
-func filterTagsByTagfile(allTags []plc.Tag) ([]plc.Tag, error) {
-	var byName = make(map[string]plc.Tag)
-	for _, tag := range allTags {
-		byName[tag.Name()] = tag
-	}
-	var ret []plc.Tag
+func getListOfNames(allTags []plc.Tag) ([]string, error) {
+	var ret []string
 
 	if *tagfile == "" {
-		return allTags, nil
+		// If no tagfile was provided, use the list of all tags
+		for _, tag := range allTags {
+			ret = append(ret, tag.Name())
+		}
+		return ret, nil
 	}
 
 	data, err := ioutil.ReadFile(*tagfile)
@@ -43,11 +43,7 @@ func filterTagsByTagfile(allTags []plc.Tag) ([]plc.Tag, error) {
 		if line == "" {
 			continue
 		}
-		tag, ok := byName[line]
-		if !ok {
-			return nil, fmt.Errorf("Tag %s missing on the PLC", line)
-		}
-		ret = append(ret, tag)
+		ret = append(ret, line)
 	}
 
 	return ret, nil
@@ -69,27 +65,27 @@ func worker(ch chan bool) {
 		panic(fmt.Sprintf("Can't get all tags: %q", err))
 	}
 
-	tags, err = filterTagsByTagfile(tags)
+	names, err := getListOfNames(tags)
 	if err != nil {
 		panic(fmt.Sprintf("Can't filter tags by tagfile: %q", err))
 	}
 
-	fmt.Printf("%q\n", tags)
+	fmt.Printf("%q\n", names)
 
-	for _, tag := range tags {
-		var val uint8
+	for _, name := range names {
+		var val uint32
 
-		err = thePlc.ReadTag(tag.Name(), &val)
+		err = thePlc.ReadTag(name, &val)
 		atomic.AddInt64(&reads, 1)
 		if err != nil {
+			fmt.Println(err)
 			atomic.AddInt64(&errors, 1)
 		}
 
-		fmt.Printf("%s: %v\n", tag.Name(), val)
+		fmt.Printf("%s: %v\n", name, val)
 	}
 	ch <- true
 }
-
 func main() {
 	flag.Parse()
 
