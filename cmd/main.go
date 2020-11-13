@@ -101,7 +101,7 @@ func main() {
 		<-ch
 	}
 	fmt.Printf("All workers completed.\n")
-	fmt.Printf("Reads:  %ld\n", atomic.LoadInt64(&reads))
-	fmt.Printf("Writes: %ld\n", atomic.LoadInt64(&writes))
-	fmt.Printf("Errors: %ld\n", atomic.LoadInt64(&errors))
+	fmt.Printf("Reads:  %v\n", atomic.LoadInt64(&reads))
+	fmt.Printf("Writes: %v\n", atomic.LoadInt64(&writes))
+	fmt.Printf("Errors: %v\n", atomic.LoadInt64(&errors))
 }
