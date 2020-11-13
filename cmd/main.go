@@ -77,7 +77,7 @@ func worker(ch chan bool) {
 	n := *iters
 	for i := 0; i < n; i++ {
 		for _, name := range names {
-			var val uint8
+			var val float32
 
 			err = thePlc.ReadTag(name, &val)
 			atomic.AddInt64(&reads, 1)
