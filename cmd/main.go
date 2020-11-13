@@ -84,13 +84,6 @@ func worker(ch chan bool) {
 				fmt.Println(err)
 				atomic.AddInt64(&errors, 1)
 			}
-
-			err = thePlc.WriteTag(name, val)
-			atomic.AddInt64(&writes, 1)
-			if err != nil {
-				fmt.Println(err)
-				atomic.AddInt64(&errors, 1)
-			}
 		}
 	}
 	ch <- true
