@@ -15,5 +15,5 @@ $ git config --global --add url."git@github.com:".insteadOf "https://github.com/
 ```
 
 ```
-$ go get ./...
+$ go get -u ./...
 $ cp ../path/to/libplctag.a vendor/github.com/stellentus/go-plc/

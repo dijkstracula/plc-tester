@@ -1,2 +1,4 @@
 github.com/stellentus/go-plc v0.0.0-20200804221222-8dbb6e2a8c29 h1:iNzUfxTtuY4zH9baF7tP1Pe6tmuNxXtPtww2x3SU3Cw=
 github.com/stellentus/go-plc v0.0.0-20200804221222-8dbb6e2a8c29/go.mod h1:ApTDzz7sy+s1sPiCPn1NbUUyk3A5qpvD3oUkpRdr6N4=
+github.com/stellentus/go-plc v0.0.0-20201110215146-69e3513286c9 h1:cnPZzz4ILTAjHAKRlQFM3FKs8RTTiEz+L+/AKqOcoK0=
+github.com/stellentus/go-plc v0.0.0-20201110215146-69e3513286c9/go.mod h1:ApTDzz7sy+s1sPiCPn1NbUUyk3A5qpvD3oUkpRdr6N4=

@@ -5,6 +5,7 @@ package plc
 #include <stdio.h>
 #include <stdlib.h>
 #include "./libplctag.h"
+typedef void(*callback)(int32_t, int, int);
 */
 import "C"
 import (
@@ -12,6 +13,8 @@ import (
 	"strings"
 	"unsafe"
 )
+
+type callback func(C.uint32_t, int, int)
 
 type PLC struct {
 	conConf string
@@ -43,6 +46,7 @@ func (plc *PLC) getID(tagName string) (C.int32_t, error) {
 	if id < 0 {
 		return id, newError(id)
 	}
+	plc.ids[tagName] = id
 	return id, nil
 }
 
@@ -247,6 +251,8 @@ func (plc *PLC) getList(id C.int32_t, prefix string) ([]Tag, []string, error) {
 	offset := C.int(0)
 	for {
 		tag := Tag{}
+
+		tag.id = C.plc_tag_get_uint32(id, offset)
 		offset += 4
 
 		tag.tagType = C.plc_tag_get_uint16(id, offset)
@@ -267,7 +273,7 @@ func (plc *PLC) getList(id C.int32_t, prefix string) ([]Tag, []string, error) {
 
 		tagBytes := make([]byte, nameLength)
 		for i := 0; i < nameLength; i++ {
-			tagBytes = append(tagBytes, byte(C.plc_tag_get_int8(id, offset)))
+			tagBytes[i] = byte(C.plc_tag_get_int8(id, offset))
 			offset++
 		}
 

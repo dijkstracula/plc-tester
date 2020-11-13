@@ -13,10 +13,15 @@ const SystemTagBit = 0x1000
 const TagDimensionMask = 0x6000
 
 type Tag struct {
+	id          C.uint32_t
 	name        string
 	tagType     C.uint16_t
 	elementSize C.uint16_t
 	dimensions  []int
+}
+
+func (tag *Tag) ID() int {
+	return int(tag.id)
 }
 
 func (tag *Tag) Name() string {
