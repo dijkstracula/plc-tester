@@ -19,6 +19,7 @@ var addr = flag.String("address", "192.168.29.121", "Hostname or IP of the PLC")
 var path = flag.String("path", "1,0", "Path to the PLC at the provided host or IP")
 var workers = flag.Int("workers", 1, "Concurrent workers")
 var tagfile = flag.String("tagfile", "", "File containing tags to peek and poke")
+var iters = flag.Int("iters", 5000, "Number of IO loops for each thread to do")
 
 var reads int64
 var writes int64
@@ -72,17 +73,25 @@ func worker(ch chan bool) {
 
 	fmt.Printf("%q\n", names)
 
-	for _, name := range names {
-		var val uint32
+	n := *iters
+	for i := 0; i < n; i++ {
+		for _, name := range names {
+			var val uint32
 
-		err = thePlc.ReadTag(name, &val)
-		atomic.AddInt64(&reads, 1)
-		if err != nil {
-			fmt.Println(err)
-			atomic.AddInt64(&errors, 1)
+			err = thePlc.ReadTag(name, &val)
+			atomic.AddInt64(&reads, 1)
+			if err != nil {
+				fmt.Println(err)
+				atomic.AddInt64(&errors, 1)
+			}
+
+			err = thePlc.WriteTag(name, val)
+			atomic.AddInt64(&writes, 1)
+			if err != nil {
+				fmt.Println(err)
+				atomic.AddInt64(&errors, 1)
+			}
 		}
-
-		fmt.Printf("%s: %v\n", name, val)
 	}
 	ch <- true
 }
