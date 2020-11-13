@@ -79,7 +79,7 @@ func worker(ch chan bool) {
 	for _, tag := range tags {
 		var val uint8
 
-		err = thePlc.ReadTag(tag.Name(), val)
+		err = thePlc.ReadTag(tag.Name(), &val)
 		atomic.AddInt64(&reads, 1)
 		if err != nil {
 			atomic.AddInt64(&errors, 1)
