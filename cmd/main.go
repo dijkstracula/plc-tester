@@ -77,9 +77,10 @@ func worker(ch chan bool) {
 	n := *iters
 	for i := 0; i < n; i++ {
 		for _, name := range names {
-			var val float32
+			var old float32
+			var new float32
 
-			err = thePlc.ReadTag(name, &val)
+			err = thePlc.ReadTag(name, &old)
 			atomic.AddInt64(&reads, 1)
 			if err != nil {
 				fmt.Printf("read to %s failed: %v\n", name, err)
@@ -87,12 +88,45 @@ func worker(ch chan bool) {
 				continue
 			}
 
-			err = thePlc.WriteTag(name, val)
+			old += 1.0
+
+			err = thePlc.WriteTag(name, old)
 			atomic.AddInt64(&writes, 1)
 			if err != nil {
 				fmt.Printf("write to %s failed: %v\n", name, err)
 				atomic.AddInt64(&errors, 1)
 			}
+
+			err = thePlc.ReadTag(name, &new)
+			atomic.AddInt64(&reads, 1)
+			if err != nil {
+				fmt.Printf("read to %s failed: %v\n", name, err)
+				atomic.AddInt64(&errors, 1)
+				continue
+			}
+
+			fmt.Printf("%s: after incr:\told: %v\tnew: %v\n", name, old, new)
+
+			// reset.
+
+			old -= 1.0
+
+			err = thePlc.WriteTag(name, old)
+			atomic.AddInt64(&writes, 1)
+			if err != nil {
+				fmt.Printf("write to %s failed: %v\n", name, err)
+				atomic.AddInt64(&errors, 1)
+			}
+
+			err = thePlc.ReadTag(name, &new)
+			atomic.AddInt64(&reads, 1)
+			if err != nil {
+				fmt.Printf("read to %s failed: %v\n", name, err)
+				atomic.AddInt64(&errors, 1)
+				continue
+			}
+
+			fmt.Printf("%s: after reset:\told: %v\tnew: %v\n", name, old, new)
 		}
 	}
 	ch <- true
