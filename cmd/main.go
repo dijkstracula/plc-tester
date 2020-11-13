@@ -100,7 +100,7 @@ func main() {
 	for i := 0; i < *workers; i++ {
 		<-ch
 	}
-	fmt.Printf("All workers completed.\n")
+	fmt.Printf("\nAll workers completed.\n")
 	fmt.Printf("Reads:  %v\n", atomic.LoadInt64(&reads))
 	fmt.Printf("Writes: %v\n", atomic.LoadInt64(&writes))
 	fmt.Printf("Errors: %v\n", atomic.LoadInt64(&errors))
