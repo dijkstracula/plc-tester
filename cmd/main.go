@@ -11,14 +11,16 @@ import (
 	"io/ioutil"
 	"strings"
 	"sync/atomic"
+	"time"
 
 	"github.com/stellentus/go-plc"
 )
 
-var addr = flag.String("address", "192.168.29.121", "Hostname or IP of the PLC")
+var addr = flag.String("address", "192.168.1.176", "Hostname or IP of the PLC")
 var path = flag.String("path", "1,0", "Path to the PLC at the provided host or IP")
 var workers = flag.Int("workers", 1, "Concurrent workers")
 var tagfile = flag.String("tagfile", "", "File containing tags to peek and poke")
+var timeout = flag.Int("timeout_ms", 5000, "Timeout (in ms)")
 var iters = flag.Int("iters", 5000, "Number of IO loops for each thread to do")
 
 var reads int64
@@ -52,9 +54,8 @@ func getListOfNames(allTags []plc.Tag) ([]string, error) {
 
 func worker(ch chan bool) {
 	connectionInfo := fmt.Sprintf("protocol=ab_eip&gateway=%s&path=%s&cpu=LGX", *addr, *path)
-	timeout := 5000
 
-	thePlc, err := plc.New(connectionInfo, timeout)
+	thePlc, err := plc.New(connectionInfo, *timeout)
 	if err != nil {
 		panic(fmt.Sprintf("Can't set up the PLC: %q", err))
 	}
@@ -92,13 +93,15 @@ func main() {
 	flag.Parse()
 
 	ch := make(chan bool, *workers)
+	b := time.Now()
 	for i := 0; i < *workers; i++ {
 		go worker(ch)
 	}
 	for i := 0; i < *workers; i++ {
 		<-ch
 	}
-	fmt.Printf("\nAll workers completed.\n")
+	e := time.Now()
+	fmt.Printf("\nAll workers completed in %v.\n", e.Sub(b))
 	fmt.Printf("Reads:  %v\n", atomic.LoadInt64(&reads))
 	fmt.Printf("Writes: %v\n", atomic.LoadInt64(&writes))
 	fmt.Printf("Errors: %v\n", atomic.LoadInt64(&errors))
