@@ -77,10 +77,17 @@ func worker(ch chan bool) {
 	n := *iters
 	for i := 0; i < n; i++ {
 		for _, name := range names {
-			var val uint32
+			var val uint8
 
 			err = thePlc.ReadTag(name, &val)
 			atomic.AddInt64(&reads, 1)
+			if err != nil {
+				fmt.Println(err)
+				atomic.AddInt64(&errors, 1)
+			}
+
+			err = thePlc.WriteTag(name, val)
+			atomic.AddInt64(&writes, 1)
 			if err != nil {
 				fmt.Println(err)
 				atomic.AddInt64(&errors, 1)
