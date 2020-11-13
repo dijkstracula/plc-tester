@@ -84,6 +84,7 @@ func worker(ch chan bool) {
 			if err != nil {
 				fmt.Printf("read to %s failed: %v\n", name, err)
 				atomic.AddInt64(&errors, 1)
+				continue
 			}
 
 			err = thePlc.WriteTag(name, val)
